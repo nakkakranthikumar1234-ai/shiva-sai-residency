@@ -1,0 +1,1405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="SSR Admin">
+<meta name="theme-color" content="#F5C518">
+<title>Shiva Sai Residency</title>
+<link rel="manifest" href="manifest.json">
+<style>
+  :root {
+    --yellow: #F5C518;
+    --yellow-dark: #D4A800;
+    --yellow-light: #FFF8D6;
+    --yellow-pale: #FFFBEA;
+    --white: #FFFFFF;
+    --text: #1A1A1A;
+    --text-muted: #666666;
+    --text-light: #999999;
+    --border: #E8E0C0;
+    --border-light: #F0E8C8;
+    --success: #2E7D32;
+    --success-bg: #E8F5E9;
+    --danger: #C62828;
+    --danger-bg: #FFEBEE;
+    --warning: #F57F17;
+    --warning-bg: #FFF8E1;
+    --shadow: 0 2px 8px rgba(0,0,0,0.08);
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #F7F4E8;
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 15px;
+    line-height: 1.5;
+    overscroll-behavior: none;
+  }
+  /* ---- TOP APP BAR ---- */
+  .app-bar {
+    background: var(--yellow);
+    padding: 12px 16px 10px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+  }
+  .app-bar-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  .app-title { font-size: 17px; font-weight: 700; color: var(--text); line-height: 1.2; }
+  .app-subtitle { font-size: 11px; color: #5A4800; margin-top: 1px; }
+  .login-btn {
+    background: var(--text);
+    color: var(--yellow);
+    border: none;
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .user-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(0,0,0,0.12);
+    border-radius: 20px;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #3A2E00;
+    cursor: pointer;
+  }
+  /* ---- NAV TABS ---- */
+  .nav-tabs {
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding-bottom: 2px;
+  }
+  .nav-tabs::-webkit-scrollbar { display: none; }
+  .nav-tab {
+    flex-shrink: 0;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1.5px solid transparent;
+    transition: all 0.15s;
+    white-space: nowrap;
+    background: rgba(0,0,0,0.08);
+    color: #3A2E00;
+  }
+  .nav-tab.active {
+    background: var(--text);
+    color: var(--yellow);
+  }
+  /* ---- CONTENT ---- */
+  .content { padding: 16px; display: none; }
+  .content.active { display: block; }
+  /* ---- CARDS ---- */
+  .card {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 12px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border-light);
+  }
+  .card-title {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  /* ---- FLAT GRID ---- */
+  .flat-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .flat-btn {
+    background: var(--yellow-pale);
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    min-height: 90px;
+    justify-content: center;
+  }
+  .flat-btn.paid {
+    border-color: var(--success);
+    background: var(--success-bg);
+  }
+  .flat-btn.due {
+    border-color: var(--danger);
+    background: var(--danger-bg);
+  }
+  .flat-btn.partial {
+    border-color: var(--warning);
+    background: var(--warning-bg);
+  }
+  .flat-num {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--text);
+  }
+  .flat-name {
+    font-size: 11px;
+    color: var(--text-muted);
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .flat-badge {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-top: 2px;
+  }
+  .badge-paid { background: var(--success-bg); color: var(--success); }
+  .badge-due { background: var(--danger-bg); color: var(--danger); }
+  .badge-partial { background: var(--warning-bg); color: var(--warning); }
+  .badge-yellow { background: var(--yellow-light); color: #7A5800; }
+  /* ---- STATS ROW ---- */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .stat-box {
+    background: var(--white);
+    border-radius: var(--radius-sm);
+    padding: 12px 8px;
+    text-align: center;
+    border: 1px solid var(--border-light);
+    box-shadow: var(--shadow);
+  }
+  .stat-num { font-size: 22px; font-weight: 800; color: var(--text); }
+  .stat-label { font-size: 10px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; margin-top: 2px; }
+  /* ---- BUTTONS ---- */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 11px 18px;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s;
+    text-decoration: none;
+    width: 100%;
+  }
+  .btn-primary { background: var(--yellow); color: var(--text); }
+  .btn-primary:active { background: var(--yellow-dark); }
+  .btn-dark { background: var(--text); color: var(--yellow); }
+  .btn-dark:active { opacity: 0.85; }
+  .btn-outline {
+    background: transparent;
+    color: var(--text);
+    border: 1.5px solid var(--border);
+  }
+  .btn-success { background: var(--success); color: #fff; }
+  .btn-danger { background: var(--danger); color: #fff; }
+  .btn-sm { padding: 7px 12px; font-size: 12px; width: auto; border-radius: 6px; }
+  .btn-row { display: flex; gap: 8px; margin-top: 10px; }
+  /* ---- FORM ---- */
+  .form-group { margin-bottom: 14px; }
+  .form-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-bottom: 5px;
+  }
+  .form-control {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 15px;
+    background: var(--white);
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.15s;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .form-control:focus { border-color: var(--yellow-dark); }
+  select.form-control { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M0 0l6 8 6-8z' fill='%23666'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
+  /* ---- RECEIPT MODAL ---- */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    z-index: 200;
+    overflow-y: auto;
+    padding: 20px 16px;
+  }
+  .modal-overlay.active { display: block; }
+  .modal {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 20px;
+    max-width: 480px;
+    margin: 0 auto;
+    position: relative;
+  }
+  .modal-close {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 30px;
+    height: 30px;
+    background: #F0F0F0;
+    border: none;
+    border-radius: 50%;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+  }
+  .modal-title { font-size: 17px; font-weight: 700; margin-bottom: 16px; padding-right: 36px; }
+  /* ---- RECEIPT DESIGN ---- */
+  .receipt {
+    background: #FFFDF5;
+    border: 1.5px dashed var(--border);
+    border-radius: var(--radius-sm);
+    padding: 20px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 12px;
+    line-height: 1.8;
+    color: var(--text);
+    margin-bottom: 14px;
+  }
+  .receipt-header { text-align: center; margin-bottom: 12px; border-bottom: 1px dashed #CCC; padding-bottom: 10px; }
+  .receipt-h1 { font-size: 15px; font-weight: 700; letter-spacing: 1px; }
+  .receipt-h2 { font-size: 11px; color: var(--text-muted); }
+  .receipt-row { display: flex; justify-content: space-between; }
+  .receipt-divider { border: none; border-top: 1px dashed #CCC; margin: 8px 0; }
+  .receipt-total { font-weight: 700; font-size: 14px; }
+  /* ---- ANNOUNCEMENT ---- */
+  .announcement-card {
+    background: var(--yellow-light);
+    border: 1.5px solid var(--yellow-dark);
+    border-radius: var(--radius);
+    padding: 14px;
+    margin-bottom: 10px;
+  }
+  .ann-date { font-size: 11px; color: var(--text-muted); }
+  .ann-title { font-weight: 700; font-size: 15px; margin: 4px 0 6px; }
+  .ann-body { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+  /* ---- LIST ITEMS ---- */
+  .list-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border-light);
+  }
+  .list-item:last-child { border-bottom: none; }
+  .list-item-left { display: flex; flex-direction: column; gap: 2px; }
+  .list-item-name { font-weight: 600; font-size: 14px; }
+  .list-item-sub { font-size: 12px; color: var(--text-muted); }
+  /* ---- SECTION HEADER ---- */
+  .section-header {
+    font-size: 18px;
+    font-weight: 800;
+    margin-bottom: 14px;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-header .icon {
+    width: 30px;
+    height: 30px;
+    background: var(--yellow);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+  /* ---- WATERMARK TAG ---- */
+  .month-tag {
+    display: inline-block;
+    background: var(--yellow);
+    color: var(--text);
+    font-size: 12px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+    margin-bottom: 12px;
+  }
+  /* ---- DUE ALERT ---- */
+  .due-alert {
+    background: var(--danger-bg);
+    border: 1.5px solid #EF9A9A;
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    font-size: 13px;
+    color: var(--danger);
+    font-weight: 600;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  /* ---- TOAST ---- */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--text);
+    color: var(--yellow);
+    padding: 10px 20px;
+    border-radius: 24px;
+    font-size: 13px;
+    font-weight: 600;
+    z-index: 999;
+    opacity: 0;
+    transition: opacity 0.3s;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; }
+  /* ---- LOGIN SCREEN ---- */
+  #login-screen {
+    position: fixed;
+    inset: 0;
+    background: var(--yellow);
+    z-index: 500;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 24px;
+  }
+  .login-logo {
+    width: 80px;
+    height: 80px;
+    background: var(--text);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    margin-bottom: 16px;
+  }
+  .login-app-name { font-size: 22px; font-weight: 800; color: var(--text); margin-bottom: 4px; }
+  .login-sub { font-size: 13px; color: #5A4800; margin-bottom: 32px; text-align: center; }
+  .login-box {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 24px;
+    width: 100%;
+    max-width: 340px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  }
+  .login-title { font-size: 16px; font-weight: 700; margin-bottom: 16px; color: var(--text); }
+  /* ---- ADMIN TABS ---- */
+  .admin-tabs {
+    display: flex;
+    gap: 0;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+  .admin-tab {
+    flex: 1;
+    padding: 9px 4px;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    border-right: 1px solid var(--border);
+  }
+  .admin-tab:last-child { border-right: none; }
+  .admin-tab.active { background: var(--yellow); color: var(--text); }
+  .admin-section { display: none; }
+  .admin-section.active { display: block; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="login-screen">
+  <div class="login-logo">🏠</div>
+  <div class="login-app-name">Shiva Sai Residency</div>
+  <div class="login-sub">Bahadurpally, Hyderabad</div>
+  <div class="login-box">
+    <div class="login-title">Admin Login</div>
+    <div class="form-group">
+      <label class="form-label">Username</label>
+      <input class="form-control" type="text" id="login-user" placeholder="Enter username" autocomplete="off">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <input class="form-control" type="password" id="login-pass" placeholder="Enter password">
+    </div>
+    <div id="login-error" style="color:var(--danger);font-size:13px;margin-bottom:10px;display:none;">Invalid credentials. Try again.</div>
+    <button class="btn btn-dark" onclick="doLogin()">Sign In</button>
+    <div style="margin-top:12px;font-size:11px;color:var(--text-light);text-align:center;">Default: admin / admin123</div>
+  </div>
+</div>
+
+<!-- APP BAR -->
+<div class="app-bar">
+  <div class="app-bar-top">
+    <div>
+      <div class="app-title">🏠 Shiva Sai Residency</div>
+      <div class="app-subtitle">Bahadurpally, Hyderabad</div>
+    </div>
+    <div class="user-badge" onclick="doLogout()" id="user-display">
+      <span id="user-name-tag">Admin</span> ▾
+    </div>
+  </div>
+  <div class="nav-tabs">
+    <div class="nav-tab active" onclick="switchTab('dashboard')">🏠 Dashboard</div>
+    <div class="nav-tab" onclick="switchTab('flats')">🏘 Flats</div>
+    <div class="nav-tab" onclick="switchTab('dues')">⚠️ Dues</div>
+    <div class="nav-tab" onclick="switchTab('announce')">📢 Announce</div>
+    <div class="nav-tab" onclick="switchTab('admin')">⚙️ Admin</div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="content active" id="tab-dashboard">
+  <div id="month-display" class="month-tag"></div>
+
+  <div class="stats-row">
+    <div class="stat-box">
+      <div class="stat-num" id="stat-total">0</div>
+      <div class="stat-label">Total Flats</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-num" id="stat-paid" style="color:var(--success)">0</div>
+      <div class="stat-label">Paid</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-num" id="stat-due" style="color:var(--danger)">0</div>
+      <div class="stat-label">Due</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📋 Quick Actions</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <button class="btn btn-primary btn-sm" onclick="switchTab('flats')">📋 View Flats</button>
+      <button class="btn btn-dark btn-sm" onclick="switchTab('announce')">📢 Announce</button>
+      <button class="btn btn-outline btn-sm" onclick="switchTab('dues')">⚠️ View Dues</button>
+      <button class="btn btn-outline btn-sm" onclick="switchTab('admin')">⚙️ Manage</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📊 This Month Collection</div>
+    <div class="stats-row" style="margin-bottom:0;">
+      <div class="stat-box">
+        <div class="stat-num" id="stat-collected" style="font-size:14px;color:var(--success)">₹0</div>
+        <div class="stat-label">Collected</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num" id="stat-pending" style="font-size:14px;color:var(--danger)">₹0</div>
+        <div class="stat-label">Pending</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num" id="stat-total-expected" style="font-size:14px;">₹0</div>
+        <div class="stat-label">Expected</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FLATS TAB -->
+<div class="content" id="tab-flats">
+  <div class="section-header"><span class="icon">🏘</span> All Flats</div>
+  <div id="month-display2" class="month-tag"></div>
+  <div class="flat-grid" id="flat-grid"></div>
+</div>
+
+<!-- DUES TAB -->
+<div class="content" id="tab-dues">
+  <div class="section-header"><span class="icon">⚠️</span> Pending Dues</div>
+  <div id="dues-list"></div>
+</div>
+
+<!-- ANNOUNCEMENTS TAB -->
+<div class="content" id="tab-announce">
+  <div class="section-header"><span class="icon">📢</span> Announcements</div>
+
+  <div class="card">
+    <div class="card-title">📝 New Announcement</div>
+    <div class="form-group">
+      <label class="form-label">Title</label>
+      <input class="form-control" type="text" id="ann-title" placeholder="e.g. Maintenance Due Reminder">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Message</label>
+      <textarea class="form-control" id="ann-body" rows="3" placeholder="Type your message here..."></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Type</label>
+      <select class="form-control" id="ann-type">
+        <option value="general">📢 General</option>
+        <option value="maintenance">💰 Maintenance Due</option>
+        <option value="water">🚿 Water Tanker</option>
+        <option value="meeting">🤝 Meeting</option>
+      </select>
+    </div>
+    <button class="btn btn-primary" onclick="postAnnouncement()">📤 Post Announcement</button>
+    <button class="btn btn-outline" style="margin-top:8px;" onclick="generateMaintenanceReminder()">💰 Quick: Maintenance Reminder</button>
+  </div>
+
+  <div class="card-title" style="margin-top:16px;">📋 Past Announcements</div>
+  <div id="announcements-list"></div>
+</div>
+
+<!-- ADMIN TAB -->
+<div class="content" id="tab-admin">
+  <div class="section-header"><span class="icon">⚙️</span> Administration</div>
+  <div class="admin-tabs">
+    <button class="admin-tab active" onclick="switchAdminTab('users')">👤 Users</button>
+    <button class="admin-tab" onclick="switchAdminTab('flats')">🏘 Flats</button>
+    <button class="admin-tab" onclick="switchAdminTab('billing')">💰 Billing</button>
+  </div>
+
+  <!-- Users Section -->
+  <div class="admin-section active" id="admin-users">
+    <div class="card">
+      <div class="card-title">➕ Add Admin User</div>
+      <div class="form-group">
+        <label class="form-label">Username</label>
+        <input class="form-control" type="text" id="new-user" placeholder="username">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input class="form-control" type="password" id="new-pass" placeholder="password">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Display Name</label>
+        <input class="form-control" type="text" id="new-display" placeholder="Full name">
+      </div>
+      <button class="btn btn-primary" onclick="addUser()">➕ Add User</button>
+    </div>
+    <div class="card">
+      <div class="card-title">👥 Admin Users</div>
+      <div id="users-list"></div>
+    </div>
+  </div>
+
+  <!-- Flats Section -->
+  <div class="admin-section" id="admin-flats">
+    <div class="card">
+      <div class="card-title">➕ Add / Edit Flat</div>
+      <div class="form-group">
+        <label class="form-label">Flat Number</label>
+        <input class="form-control" type="text" id="flat-num-input" placeholder="e.g. 101, 202-A">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Type</label>
+        <select class="form-control" id="flat-type-input">
+          <option value="1BHK">1 BHK — ₹700/mo</option>
+          <option value="2BHK">2 BHK — ₹1,000/mo</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Owner Name</label>
+        <input class="form-control" type="text" id="flat-owner-input" placeholder="Owner full name">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tenant Name (if different)</label>
+        <input class="form-control" type="text" id="flat-tenant-input" placeholder="Tenant name or leave blank">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Phone Number</label>
+        <input class="form-control" type="tel" id="flat-phone-input" placeholder="10-digit mobile number">
+      </div>
+      <input type="hidden" id="flat-edit-id" value="">
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="saveFlat()">💾 Save Flat</button>
+        <button class="btn btn-outline" onclick="clearFlatForm()">✖ Clear</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">🏘 Registered Flats</div>
+      <div id="admin-flats-list"></div>
+    </div>
+  </div>
+
+  <!-- Billing Section -->
+  <div class="admin-section" id="admin-billing">
+    <div class="card">
+      <div class="card-title">💰 Record Payment</div>
+      <div class="form-group">
+        <label class="form-label">Select Flat</label>
+        <select class="form-control" id="pay-flat-select"></select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Amount Paid (₹)</label>
+        <input class="form-control" type="number" id="pay-amount" placeholder="0">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Payment Date</label>
+        <input class="form-control" type="date" id="pay-date">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Payment Month</label>
+        <input class="form-control" type="month" id="pay-month">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Mode of Payment</label>
+        <select class="form-control" id="pay-mode">
+          <option value="Cash">Cash</option>
+          <option value="UPI">UPI</option>
+          <option value="Bank Transfer">Bank Transfer</option>
+          <option value="Cheque">Cheque</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notes (optional)</label>
+        <input class="form-control" type="text" id="pay-notes" placeholder="Any remarks">
+      </div>
+      <button class="btn btn-success" onclick="recordPayment()">✅ Record & Generate Receipt</button>
+    </div>
+  </div>
+</div>
+
+<!-- FLAT DETAIL MODAL -->
+<div class="modal-overlay" id="flat-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('flat-modal')">×</button>
+    <div class="modal-title" id="fmod-title">Flat Details</div>
+    <div id="fmod-content"></div>
+  </div>
+</div>
+
+<!-- RECEIPT MODAL -->
+<div class="modal-overlay" id="receipt-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('receipt-modal')">×</button>
+    <div class="modal-title">Payment Receipt</div>
+    <div id="receipt-content"></div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="shareReceipt()">📤 Share Receipt</button>
+      <button class="btn btn-outline" onclick="printReceipt()">🖨 Print</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+// WHATSAPP MESSAGE FUNCTION
+// ============================================================
+function sendMessage(phone, balance, monthStr, flatNumber) {
+  if (!phone) {
+    showToast('No phone number saved for this flat.');
+    return;
+  }
+
+  // Remove any spaces or special characters from the phone number
+  const cleanPhone = phone.replace(/[^0-9]/g, '');
+  
+  // Automatically prepend India's country code (+91) if it's a standard 10-digit number
+  const finalPhone = cleanPhone.length === 10 ? '91' + cleanPhone : cleanPhone;
+
+  // Draft the message based on their current balance
+  let text = '';
+  if (balance > 0) {
+    text = `Hello, this is a gentle reminder from Shiva Sai Residency. The maintenance balance for Flat ${flatNumber} for ${monthStr} is ₹${balance.toLocaleString('en-IN')}. Kindly pay at your earliest convenience. Thank you!`;
+  } else {
+    text = `Hello from Shiva Sai Residency! This is a message regarding Flat ${flatNumber}.`;
+  }
+
+  // Open WhatsApp in a new tab/app with the pre-filled message
+  const url = `https://wa.me/${finalPhone}?text=${encodeURIComponent(text)}`;
+  window.open(url, '_blank');
+}
+
+// ============================================================
+// STATE & DEFAULTS
+// ============================================================
+const RATES = { '1BHK': 700, '2BHK': 1000 };
+
+function getMonthKey(d) {
+  const dt = d || new Date();
+  return dt.getFullYear() + '-' + String(dt.getMonth()+1).padStart(2,'0');
+}
+function monthLabel(mk) {
+  const [y,m] = mk.split('-');
+  const names = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return names[parseInt(m)-1] + ' ' + y;
+}
+
+const CURRENT_MONTH = getMonthKey();
+
+// Default admin users
+const DEFAULT_USERS = [
+  { id: 'u1', username: 'admin', password: 'admin123', display: 'Admin (President)' }
+];
+
+// Default flats
+const DEFAULT_FLATS = [
+  { id:'f1', number:'101', type:'1BHK', owner:'Owner 101', tenant:'', phone:'' },
+  { id:'f2', number:'102', type:'2BHK', owner:'Owner 102', tenant:'', phone:'' },
+  { id:'f3', number:'103', type:'1BHK', owner:'Owner 103', tenant:'', phone:'' },
+  { id:'f4', number:'104', type:'2BHK', owner:'Owner 104', tenant:'', phone:'' },
+  { id:'f5', number:'201', type:'1BHK', owner:'Owner 201', tenant:'', phone:'' },
+  { id:'f6', number:'202', type:'2BHK', owner:'Owner 202', tenant:'', phone:'' },
+  { id:'f7', number:'203', type:'1BHK', owner:'Owner 203', tenant:'', phone:'' },
+  { id:'f8', number:'204', type:'2BHK', owner:'Owner 204', tenant:'', phone:'' },
+];
+
+function load(key, def) {
+  try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : def; }
+  catch(e) { return def; }
+}
+function save(key, val) {
+  try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) {}
+}
+
+let users = load('ssr_users', DEFAULT_USERS);
+let flats = load('ssr_flats', DEFAULT_FLATS);
+let payments = load('ssr_payments', []);  
+let announcements = load('ssr_ann', []);
+let currentUser = null;
+let activeReceiptData = null;
+
+// ============================================================
+// AUTH
+// ============================================================
+function doLogin() {
+  const u = document.getElementById('login-user').value.trim();
+  const p = document.getElementById('login-pass').value.trim();
+  const found = users.find(x => x.username === u && x.password === p);
+  if (!found) {
+    document.getElementById('login-error').style.display = 'block';
+    return;
+  }
+  currentUser = found;
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('user-name-tag').textContent = found.display.split(' ')[0];
+  refreshAll();
+  showToast('Welcome, ' + found.display.split(' ')[0] + '!');
+}
+
+function doLogout() {
+  if (!confirm('Log out?')) return;
+  currentUser = null;
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('login-user').value = '';
+  document.getElementById('login-pass').value = '';
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function switchTab(name) {
+  document.querySelectorAll('.nav-tab').forEach((t,i) => {
+    const tabs = ['dashboard','flats','dues','announce','admin'];
+    t.classList.toggle('active', tabs[i] === name);
+  });
+  document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  if (name === 'flats') renderFlats();
+  if (name === 'dues') renderDues();
+  if (name === 'announce') renderAnnouncements();
+  if (name === 'admin') { renderAdminUsers(); renderAdminFlats(); populateBillingFlats(); }
+}
+
+function switchAdminTab(name) {
+  document.querySelectorAll('.admin-tab').forEach((t,i) => {
+    const tabs = ['users','flats','billing'];
+    t.classList.toggle('active', tabs[i] === name);
+  });
+  document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
+  document.getElementById('admin-' + name).classList.add('active');
+  if (name === 'billing') {
+    populateBillingFlats();
+    document.getElementById('pay-date').value = new Date().toISOString().split('T')[0];
+    document.getElementById('pay-month').value = CURRENT_MONTH;
+  }
+  if (name === 'flats') renderAdminFlats();
+  if (name === 'users') renderAdminUsers();
+}
+
+// ============================================================
+// DATA HELPERS
+// ============================================================
+function getPaymentsForMonth(month) {
+  return payments.filter(p => p.month === month);
+}
+function getFlatPayment(flatId, month) {
+  const m = month || CURRENT_MONTH;
+  return payments.filter(p => p.flatId === flatId && p.month === m);
+}
+function flatIsPaid(flatId, month) {
+  const flat = flats.find(f => f.id === flatId);
+  if (!flat) return false;
+  const due = RATES[flat.type];
+  const paid = getFlatPayment(flatId, month).reduce((s,p) => s + Number(p.amount), 0);
+  return paid >= due;
+}
+function flatDisplayName(flat) {
+  return flat.tenant ? flat.tenant : flat.owner;
+}
+function newId() {
+  return Date.now().toString(36) + Math.random().toString(36).substr(2,4);
+}
+function receiptNo() {
+  return 'SSR-' + new Date().getFullYear() + '-' + String(payments.length + 1).padStart(4,'0');
+}
+
+// ============================================================
+// DASHBOARD
+// ============================================================
+function refreshAll() {
+  const month = CURRENT_MONTH;
+  const totalFlats = flats.length;
+  const paid = flats.filter(f => flatIsPaid(f.id, month)).length;
+  const due = totalFlats - paid;
+
+  const collected = getPaymentsForMonth(month).reduce((s,p) => s + Number(p.amount), 0);
+  const expected = flats.reduce((s,f) => s + RATES[f.type], 0);
+
+  document.querySelectorAll('#month-display, #month-display2').forEach(el => {
+    if(el) el.textContent = monthLabel(month) + ' — Current Month';
+  });
+  set('stat-total', totalFlats);
+  set('stat-paid', paid);
+  set('stat-due', due);
+  set('stat-collected', '₹' + collected.toLocaleString('en-IN'));
+  set('stat-pending', '₹' + (expected - collected).toLocaleString('en-IN'));
+  set('stat-total-expected', '₹' + expected.toLocaleString('en-IN'));
+}
+
+function set(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = val;
+}
+
+// ============================================================
+// FLATS
+// ============================================================
+function renderFlats() {
+  const grid = document.getElementById('flat-grid');
+  if (!grid) return;
+  const month = CURRENT_MONTH;
+  grid.innerHTML = flats.map(flat => {
+    const paid = flatIsPaid(flat.id, month);
+    const flatPays = getFlatPayment(flat.id, month);
+    const paidAmt = flatPays.reduce((s,p) => s + Number(p.amount), 0);
+    const due = RATES[flat.type];
+    const partial = !paid && paidAmt > 0;
+    let cls = paid ? 'paid' : (partial ? 'partial' : 'due');
+    let badgeHtml = paid
+      ? '<span class="flat-badge badge-paid">✅ Paid</span>'
+      : (partial
+        ? '<span class="flat-badge badge-partial">⚡ Partial</span>'
+        : '<span class="flat-badge badge-due">❌ Due</span>');
+    return `<div class="flat-btn ${cls}" onclick="openFlat('${flat.id}')">
+      <div class="flat-num">${flat.number}</div>
+      <div class="flat-name">${flatDisplayName(flat)}</div>
+      <div style="font-size:10px;color:var(--text-light)">${flat.type} · ₹${due}</div>
+      ${badgeHtml}
+    </div>`;
+  }).join('');
+}
+
+function openFlat(flatId) {
+  const flat = flats.find(f => f.id === flatId);
+  if (!flat) return;
+  const month = CURRENT_MONTH;
+  const flatPays = getFlatPayment(flatId, month);
+  const paidAmt = flatPays.reduce((s,p) => s + Number(p.amount), 0);
+  const due = RATES[flat.type];
+  const balance = due - paidAmt;
+  const paid = paidAmt >= due;
+
+  document.getElementById('fmod-title').textContent = 'Flat ' + flat.number + ' — ' + monthLabel(month);
+  let html = `
+    <div style="margin-bottom:12px;">
+      <div class="list-item">
+        <span class="list-item-sub">Owner</span>
+        <span class="list-item-name">${flat.owner || '—'}</span>
+      </div>
+      ${flat.tenant ? `<div class="list-item"><span class="list-item-sub">Tenant</span><span class="list-item-name">${flat.tenant}</span></div>` : ''}
+      <div class="list-item">
+        <span class="list-item-sub">Type</span>
+        <span class="list-item-name">${flat.type} · ₹${due}/mo</span>
+      </div>
+      ${flat.phone ? `<div class="list-item"><span class="list-item-sub">Phone</span><span class="list-item-name">${flat.phone}</span></div>` : ''}
+    </div>`;
+
+  if (flatPays.length > 0) {
+    html += `<div class="card" style="margin-bottom:10px;"><div class="card-title">💰 Payments — ${monthLabel(month)}</div>`;
+    flatPays.forEach(p => {
+      html += `<div class="list-item">
+        <div class="list-item-left">
+          <span class="list-item-name">₹${Number(p.amount).toLocaleString('en-IN')}</span>
+          <span class="list-item-sub">${p.date} · ${p.mode}</span>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="showReceipt('${p.id}')">🧾 Receipt</button>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  if (paid) {
+    html += `<div style="background:var(--success-bg);border:1.5px solid #A5D6A7;border-radius:8px;padding:12px;text-align:center;color:var(--success);font-weight:700;margin-bottom:10px;">✅ Fully Paid for ${monthLabel(month)}</div>`;
+  } else {
+    html += `<div class="due-alert">⚠️ Balance Due: ₹${balance.toLocaleString('en-IN')}</div>`;
+    if (!currentUser) {
+      html += `<div style="color:var(--text-muted);font-size:12px;text-align:center;">Log in to record payment.</div>`;
+    }
+  }
+
+  // --- NEW: MESSAGE BUTTON ---
+  if (flat.phone) {
+    html += `<button class="btn btn-dark" style="margin-top: 10px;" onclick="sendMessage('${flat.phone}', ${balance}, '${monthLabel(month)}', '${flat.number}')">💬 Send WhatsApp Message</button>`;
+  } else {
+    html += `<div style="margin-top:10px;text-align:center;font-size:12px;color:var(--text-muted);">⚠️ Add a phone number in Admin > Flats to send messages.</div>`;
+  }
+
+  document.getElementById('fmod-content').innerHTML = html;
+  document.getElementById('flat-modal').classList.add('active');
+}
+
+// ============================================================
+// DUES
+// ============================================================
+function renderDues() {
+  const el = document.getElementById('dues-list');
+  const month = CURRENT_MONTH;
+  const dueFlats = flats.filter(f => !flatIsPaid(f.id, month));
+  if (dueFlats.length === 0) {
+    el.innerHTML = `<div style="text-align:center;padding:32px;color:var(--text-muted);font-size:15px;">🎉 All flats paid for ${monthLabel(month)}!</div>`;
+    return;
+  }
+  el.innerHTML = `<div class="card-title" style="color:var(--danger);">⚠️ ${dueFlats.length} Flat(s) Pending — ${monthLabel(month)}</div>` +
+    dueFlats.map(flat => {
+      const flatPays = getFlatPayment(flat.id, month);
+      const paidAmt = flatPays.reduce((s,p) => s + Number(p.amount), 0);
+      const due = RATES[flat.type];
+      const balance = due - paidAmt;
+      return `<div class="card" style="border-left:4px solid var(--danger);border-radius:0 var(--radius) var(--radius) 0;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+          <div>
+            <div style="font-size:18px;font-weight:800;">Flat ${flat.number}</div>
+            <div style="font-size:13px;color:var(--text-muted);">${flatDisplayName(flat)} · ${flat.type}</div>
+            ${flat.phone ? `<div style="font-size:12px;color:var(--text-light);">📞 ${flat.phone}</div>` : ''}
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:20px;font-weight:800;color:var(--danger);">₹${balance.toLocaleString('en-IN')}</div>
+            <div style="font-size:11px;color:var(--text-muted);">Outstanding</div>
+          </div>
+        </div>
+        ${paidAmt > 0 ? `<div style="margin-top:6px;font-size:12px;color:var(--warning);">⚡ Partial: ₹${paidAmt} paid of ₹${due}</div>` : ''}
+      </div>`;
+    }).join('');
+}
+
+// ============================================================
+// PAYMENTS & RECEIPTS
+// ============================================================
+function populateBillingFlats() {
+  const sel = document.getElementById('pay-flat-select');
+  if (!sel) return;
+  sel.innerHTML = flats.map(f => `<option value="${f.id}">Flat ${f.number} (${f.type}) — ${flatDisplayName(f)}</option>`).join('');
+}
+
+function recordPayment() {
+  const flatId = document.getElementById('pay-flat-select').value;
+  const amount = parseFloat(document.getElementById('pay-amount').value);
+  const date = document.getElementById('pay-date').value;
+  const month = document.getElementById('pay-month').value;
+  const mode = document.getElementById('pay-mode').value;
+  const notes = document.getElementById('pay-notes').value.trim();
+
+  if (!flatId || !amount || !date || !month) {
+    showToast('Please fill all required fields.'); return;
+  }
+  if (isNaN(amount) || amount <= 0) {
+    showToast('Enter a valid amount.'); return;
+  }
+
+  const flat = flats.find(f => f.id === flatId);
+  const rno = receiptNo();
+  const payment = { id: newId(), flatId, amount, date, month, mode, notes, receiptNo: rno, recordedBy: currentUser?.display || 'Admin' };
+  payments.push(payment);
+  save('ssr_payments', payments);
+
+  refreshAll();
+  showToast('Payment recorded! Receipt ' + rno);
+  showReceipt(payment.id);
+
+  // clear form
+  document.getElementById('pay-amount').value = '';
+  document.getElementById('pay-notes').value = '';
+}
+
+function showReceipt(paymentId) {
+  const p = payments.find(x => x.id === paymentId);
+  if (!p) return;
+  const flat = flats.find(f => f.id === p.flatId);
+  if (!flat) return;
+
+  const dueAmt = RATES[flat.type];
+  const allPay = getFlatPayment(p.flatId, p.month).reduce((s,x) => s + Number(x.amount), 0);
+  const balance = dueAmt - allPay;
+
+  activeReceiptData = { p, flat, dueAmt, allPay, balance };
+
+  const dateStr = new Date(p.date).toLocaleDateString('en-IN', { day:'numeric', month:'long', year:'numeric' });
+
+  document.getElementById('receipt-content').innerHTML = `
+    <div class="receipt" id="printable-receipt">
+      <div class="receipt-header">
+        <div class="receipt-h1">🏠 SHIVA SAI RESIDENCY</div>
+        <div class="receipt-h2">Bahadurpally, Hyderabad</div>
+        <div class="receipt-h2" style="margin-top:4px;">MAINTENANCE RECEIPT</div>
+      </div>
+      <div class="receipt-row"><span>Receipt No:</span><span>${p.receiptNo}</span></div>
+      <div class="receipt-row"><span>Date:</span><span>${dateStr}</span></div>
+      <div class="receipt-row"><span>Month:</span><span>${monthLabel(p.month)}</span></div>
+      <hr class="receipt-divider">
+      <div class="receipt-row"><span>Flat No:</span><span>${flat.number}</span></div>
+      <div class="receipt-row"><span>Flat Type:</span><span>${flat.type}</span></div>
+      <div class="receipt-row"><span>Owner:</span><span>${flat.owner}</span></div>
+      ${flat.tenant ? `<div class="receipt-row"><span>Tenant:</span><span>${flat.tenant}</span></div>` : ''}
+      <hr class="receipt-divider">
+      <div class="receipt-row"><span>Monthly Due:</span><span>₹${dueAmt.toLocaleString('en-IN')}</span></div>
+      <div class="receipt-row receipt-total"><span>Amount Paid:</span><span>₹${Number(p.amount).toLocaleString('en-IN')}</span></div>
+      <div class="receipt-row"><span>Mode:</span><span>${p.mode}</span></div>
+      ${p.notes ? `<div class="receipt-row"><span>Notes:</span><span>${p.notes}</span></div>` : ''}
+      <hr class="receipt-divider">
+      <div class="receipt-row" style="${balance <= 0 ? 'color:green;font-weight:700;' : 'color:red;font-weight:700;'}">
+        <span>${balance <= 0 ? '✅ FULLY PAID' : '⚠️ BALANCE DUE'}:</span>
+        <span>${balance <= 0 ? 'NIL' : '₹'+Math.abs(balance).toLocaleString('en-IN')}</span>
+      </div>
+      <hr class="receipt-divider">
+      <div style="text-align:center;font-size:11px;color:#999;margin-top:8px;">
+        Recorded by: ${p.recordedBy}<br>
+        This is a computer-generated receipt.<br>
+        Shiva Sai Residency Association
+      </div>
+    </div>`;
+
+  closeModal('flat-modal');
+  document.getElementById('receipt-modal').classList.add('active');
+}
+
+function shareReceipt() {
+  if (!activeReceiptData) return;
+  const { p, flat, dueAmt, balance } = activeReceiptData;
+  const text = `🏠 *SHIVA SAI RESIDENCY*\n` +
+    `Bahadurpally, Hyderabad\n\n` +
+    `📋 *MAINTENANCE RECEIPT*\n` +
+    `Receipt No: ${p.receiptNo}\n` +
+    `Date: ${p.date}\n` +
+    `Month: ${monthLabel(p.month)}\n\n` +
+    `🏘 Flat: ${flat.number} (${flat.type})\n` +
+    `👤 ${flatDisplayName(flat)}\n\n` +
+    `💰 Monthly Due: ₹${dueAmt.toLocaleString('en-IN')}\n` +
+    `✅ Amount Paid: ₹${Number(p.amount).toLocaleString('en-IN')}\n` +
+    `Mode: ${p.mode}\n` +
+    `${balance <= 0 ? '✅ Fully Paid' : '⚠️ Balance Due: ₹' + Math.abs(balance).toLocaleString('en-IN')}\n\n` +
+    `_Shiva Sai Residency Association_`;
+
+  if (navigator.share) {
+    navigator.share({ title: 'Receipt ' + p.receiptNo, text });
+  } else if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(() => showToast('Receipt text copied!'));
+  } else {
+    showToast('Share not supported on this browser.');
+  }
+}
+
+function printReceipt() {
+  const content = document.getElementById('printable-receipt');
+  if (!content) return;
+  const w = window.open('', '_blank');
+  w.document.write(`<html><head><title>Receipt</title>
+    <style>body{font-family:'Courier New',Courier,monospace;font-size:12px;padding:20px;max-width:300px;margin:0 auto;}
+    .receipt-row{display:flex;justify-content:space-between;margin:3px 0;}
+    hr{border:none;border-top:1px dashed #ccc;margin:8px 0;}
+    .receipt-total{font-weight:bold;font-size:14px;}
+    </style></head><body>${content.innerHTML}</body></html>`);
+  w.document.close();
+  w.focus();
+  w.print();
+  w.close();
+}
+
+// ============================================================
+// ANNOUNCEMENTS
+// ============================================================
+function postAnnouncement() {
+  const title = document.getElementById('ann-title').value.trim();
+  const body = document.getElementById('ann-body').value.trim();
+  const type = document.getElementById('ann-type').value;
+  if (!title || !body) { showToast('Fill title and message.'); return; }
+
+  const ann = {
+    id: newId(),
+    title, body, type,
+    date: new Date().toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' }),
+    by: currentUser?.display || 'Admin'
+  };
+  announcements.unshift(ann);
+  save('ssr_ann', announcements);
+  document.getElementById('ann-title').value = '';
+  document.getElementById('ann-body').value = '';
+  renderAnnouncements();
+  showToast('Announcement posted!');
+}
+
+function generateMaintenanceReminder() {
+  document.getElementById('ann-title').value = 'Maintenance Due Reminder — ' + monthLabel(CURRENT_MONTH);
+  const lines = flats.filter(f => !flatIsPaid(f.id, CURRENT_MONTH))
+    .map(f => `• Flat ${f.number} (${f.type}): ₹${RATES[f.type]}`).join('\n');
+  document.getElementById('ann-body').value =
+    `Dear Residents,\n\nKindly pay your maintenance for ${monthLabel(CURRENT_MONTH)}:\n\n${lines || 'All flats paid!'}\n\n• 1 BHK: ₹700/month\n• 2 BHK: ₹1,000/month\n\nPlease pay at the earliest.\n\nThank you,\nShiva Sai Residency Association`;
+  document.getElementById('ann-type').value = 'maintenance';
+  showToast('Template loaded — review and post!');
+}
+
+function renderAnnouncements() {
+  const el = document.getElementById('announcements-list');
+  if (!el) return;
+  if (announcements.length === 0) {
+    el.innerHTML = `<div style="text-align:center;padding:24px;color:var(--text-muted);">No announcements yet.</div>`;
+    return;
+  }
+  const icons = { general:'📢', maintenance:'💰', water:'🚿', meeting:'🤝' };
+  el.innerHTML = announcements.map(a => `
+    <div class="announcement-card">
+      <div class="ann-date">${icons[a.type]||'📢'} ${a.date} · ${a.by}</div>
+      <div class="ann-title">${a.title}</div>
+      <div class="ann-body" style="white-space:pre-line;">${a.body}</div>
+      <div style="display:flex;gap:8px;margin-top:10px;">
+        <button class="btn btn-primary btn-sm" onclick="shareAnnouncement('${a.id}')">📤 Share</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteAnnouncement('${a.id}')">🗑 Delete</button>
+      </div>
+    </div>`).join('');
+}
+
+function shareAnnouncement(id) {
+  const a = announcements.find(x => x.id === id);
+  if (!a) return;
+  const text = `🏠 *SHIVA SAI RESIDENCY*\n${a.date}\n\n*${a.title}*\n\n${a.body}\n\n— ${a.by}, Shiva Sai Residency`;
+  if (navigator.share) {
+    navigator.share({ title: a.title, text });
+  } else if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(() => showToast('Copied to clipboard!'));
+  }
+}
+
+function deleteAnnouncement(id) {
+  if (!confirm('Delete this announcement?')) return;
+  announcements = announcements.filter(a => a.id !== id);
+  save('ssr_ann', announcements);
+  renderAnnouncements();
+}
+
+// ============================================================
+// ADMIN — USERS
+// ============================================================
+function renderAdminUsers() {
+  const el = document.getElementById('users-list');
+  if (!el) return;
+  el.innerHTML = users.map(u => `
+    <div class="list-item">
+      <div class="list-item-left">
+        <span class="list-item-name">${u.display}</span>
+        <span class="list-item-sub">@${u.username}</span>
+      </div>
+      ${u.id !== 'u1' ? `<button class="btn btn-danger btn-sm" onclick="deleteUser('${u.id}')">🗑</button>` : '<span class="flat-badge badge-yellow">President</span>'}
+    </div>`).join('');
+}
+
+function addUser() {
+  if (users.length >= 5) { showToast('Max 5 admin users allowed.'); return; }
+  const u = document.getElementById('new-user').value.trim();
+  const p = document.getElementById('new-pass').value.trim();
+  const d = document.getElementById('new-display').value.trim();
+  if (!u || !p || !d) { showToast('Fill all fields.'); return; }
+  if (users.find(x => x.username === u)) { showToast('Username already exists.'); return; }
+  users.push({ id: newId(), username: u, password: p, display: d });
+  save('ssr_users', users);
+  document.getElementById('new-user').value = '';
+  document.getElementById('new-pass').value = '';
+  document.getElementById('new-display').value = '';
+  renderAdminUsers();
+  showToast('User added!');
+}
+
+function deleteUser(id) {
+  if (!confirm('Remove this user?')) return;
+  users = users.filter(u => u.id !== id);
+  save('ssr_users', users);
+  renderAdminUsers();
+}
+
+// ============================================================
+// ADMIN — FLATS
+// ============================================================
+function renderAdminFlats() {
+  const el = document.getElementById('admin-flats-list');
+  if (!el) return;
+  el.innerHTML = flats.map(f => `
+    <div class="list-item">
+      <div class="list-item-left">
+        <span class="list-item-name">Flat ${f.number} · ${f.type}</span>
+        <span class="list-item-sub">${f.owner}${f.tenant ? ' / '+f.tenant : ''}</span>
+        ${f.phone ? `<span class="list-item-sub">📞 ${f.phone}</span>` : ''}
+      </div>
+      <div style="display:flex;gap:6px;">
+        <button class="btn btn-outline btn-sm" onclick="editFlat('${f.id}')">✏️</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteFlat('${f.id}')">🗑</button>
+      </div>
+    </div>`).join('');
+}
+
+function saveFlat() {
+  const num = document.getElementById('flat-num-input').value.trim();
+  const type = document.getElementById('flat-type-input').value;
+  const owner = document.getElementById('flat-owner-input').value.trim();
+  const tenant = document.getElementById('flat-tenant-input').value.trim();
+  const phone = document.getElementById('flat-phone-input').value.trim();
+  const editId = document.getElementById('flat-edit-id').value;
+
+  if (!num || !owner) { showToast('Flat number and owner are required.'); return; }
+
+  if (editId) {
+    const f = flats.find(x => x.id === editId);
+    if (f) { f.number = num; f.type = type; f.owner = owner; f.tenant = tenant; f.phone = phone; }
+  } else {
+    if (flats.find(f => f.number === num)) { showToast('Flat number already exists.'); return; }
+    flats.push({ id: newId(), number: num, type, owner, tenant, phone });
+  }
+  save('ssr_flats', flats);
+  clearFlatForm();
+  renderAdminFlats();
+  populateBillingFlats();
+  refreshAll();
+  showToast(editId ? 'Flat updated!' : 'Flat added!');
+}
+
+function editFlat(id) {
+  const f = flats.find(x => x.id === id);
+  if (!f) return;
+  document.getElementById('flat-num-input').value = f.number;
+  document.getElementById('flat-type-input').value = f.type;
+  document.getElementById('flat-owner-input').value = f.owner;
+  document.getElementById('flat-tenant-input').value = f.tenant || '';
+  document.getElementById('flat-phone-input').value = f.phone || '';
+  document.getElementById('flat-edit-id').value = f.id;
+  document.getElementById('flat-num-input').focus();
+}
+
+function deleteFlat(id) {
+  if (!confirm('Delete this flat? All payment records for this flat will also be removed.')) return;
+  flats = flats.filter(f => f.id !== id);
+  payments = payments.filter(p => p.flatId !== id);
+  save('ssr_flats', flats);
+  save('ssr_payments', payments);
+  renderAdminFlats();
+  populateBillingFlats();
+  refreshAll();
+  showToast('Flat deleted.');
+}
+
+function clearFlatForm() {
+  document.getElementById('flat-num-input').value = '';
+  document.getElementById('flat-owner-input').value = '';
+  document.getElementById('flat-tenant-input').value = '';
+  document.getElementById('flat-phone-input').value = '';
+  document.getElementById('flat-edit-id').value = '';
+  document.getElementById('flat-type-input').value = '1BHK';
+}
+
+// ============================================================
+// MODALS
+// ============================================================
+function closeModal(id) {
+  document.getElementById(id).classList.remove('active');
+}
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('active'); });
+});
+
+// ============================================================
+// TOAST
+// ============================================================
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ============================================================
+// INIT
+// ============================================================
+window.addEventListener('load', () => {
+  // pre-fill date inputs
+  const today = new Date().toISOString().split('T')[0];
+  const payDate = document.getElementById('pay-date');
+  if (payDate) payDate.value = today;
+  const payMonth = document.getElementById('pay-month');
+  if (payMonth) payMonth.value = CURRENT_MONTH;
+});
+
+// Allow Enter key on login
+document.getElementById('login-pass').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
+});
+</script>
+</body>
+</html>
