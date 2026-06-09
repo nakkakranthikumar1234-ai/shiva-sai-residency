@@ -460,6 +460,36 @@
   .admin-tab.active { background: var(--yellow); color: var(--text); }
   .admin-section { display: none; }
   .admin-section.active { display: block; }
+  /* ---- PRINT STYLES FOR MOBILE & DESKTOP ---- */
+  @media print {
+    /* Hide everything on the page by default */
+    body * {
+      visibility: hidden;
+    }
+    /* Only make the receipt modal and its contents visible */
+    #receipt-modal, #printable-receipt, #printable-receipt * {
+      visibility: visible;
+    }
+    /* Position the receipt at the top left of the page */
+    #receipt-modal {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      padding: 0;
+      background: none;
+    }
+    .modal {
+      box-shadow: none;
+      border: none;
+      padding: 0;
+      margin: 0;
+    }
+    /* Hide the close button, print/share buttons, and modal title */
+    .modal-close, .btn-row, .modal-title {
+      display: none !important;
+    }
+  }
 </style>
 </head>
 <body>
