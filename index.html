@@ -1161,19 +1161,7 @@ function shareReceipt() {
 }
 
 function printReceipt() {
-  const content = document.getElementById('printable-receipt');
-  if (!content) return;
-  const w = window.open('', '_blank');
-  w.document.write(`<html><head><title>Receipt</title>
-    <style>body{font-family:'Courier New',Courier,monospace;font-size:12px;padding:20px;max-width:300px;margin:0 auto;}
-    .receipt-row{display:flex;justify-content:space-between;margin:3px 0;}
-    hr{border:none;border-top:1px dashed #ccc;margin:8px 0;}
-    .receipt-total{font-weight:bold;font-size:14px;}
-    </style></head><body>${content.innerHTML}</body></html>`);
-  w.document.close();
-  w.focus();
-  w.print();
-  w.close();
+  window.print();
 }
 
 // ============================================================
